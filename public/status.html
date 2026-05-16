@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resto Scan - Status Pesanan</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .status-pending {
+            background: #ffc107;
+            color: white;
+        }
+
+        .status-diproses {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .status-siap {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-selesai {
+            background: #6c757d;
+            color: white;
+        }
+
+        .order-detail {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-items {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Status Pesanan</h1>
+            <button class="btn btn-secondary" onclick="goHome()">← Kembali ke Menu</button>
+        </div>
+
+        <div id="orderStatus" class="loading">
+            <p>Mengambil data pesanan...</p>
+        </div>
+    </div>
+
+    <script>
+        // Ambil order_id dari URL parameter
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get('order_id');
+
+        if (!orderId) {
+            document.getElementById('orderStatus').innerHTML = '<p>Order ID tidak ditemukan</p>';
+        } else {
+            // Polling setiap 5 detik untuk update status
+            loadOrderStatus();
+            setInterval(loadOrderStatus, 5000);
+        }
+
+        async function loadOrderStatus() {
+            try {
+                // Ambil data order
+                const response = await fetch(`http://localhost:3000/api/orders/${orderId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    renderOrderStatus(data.order);
+                } else {
+                    document.getElementById('orderStatus').innerHTML = `<p>${data.message}</p>`;
+                }
+            } catch (err) {
+                console.error('Error loading order:', err);
+            }
+        }
+
+        function renderOrderStatus(order) {
+            const statusClass = `status-${order.status}`;
+            const statusLabel = {
+                'pending': '⏳ Menunggu Dikonfirmasi',
+                'diproses': '👨‍🍳 Sedang Dimasak',
+                'siap': '✅ Siap Dihidangkan',
+                'selesai': '🎉 Selesai'
+            };
+
+            const html = `
+        <div class="order-detail">
+          <h2>Pesanan #${order.id.slice(0, 8).toUpperCase()}</h2>
+          <p><strong>Nama:</strong> ${order.customer_name}</p>
+          <p><strong>Meja:</strong> ${order.table_number}</p>
+          <p><strong>Status:</strong> <span class="status-badge ${statusClass}">${statusLabel[order.status] || order.status}</span></p>
+          <p><strong>Waktu:</strong> ${new Date(order.created_at).toLocaleString('id-ID')}</p>
+
+          <div class="order-items">
+            <h3>Item Pesanan:</h3>
+            <div id="itemsList"></div>
+          </div>
+        </div>
+      `;
+
+            document.getElementById('orderStatus').innerHTML = html;
+
+            // Load order items
+            loadOrderItems(order.id);
+        }
+
+        async function loadOrderItems(orderId) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/orders/${orderId}/items`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const itemsHtml = data.items.map(item => `
+            <div class="order-item">
+              <span>${item.menu_name}</span>
+              <span>${item.quantity}x</span>
+              <span>Rp ${(item.price * item.quantity).toLocaleString('id-ID')}</span>
+            </div>
+          `).join('');
+
+                    document.getElementById('itemsList').innerHTML = itemsHtml;
+                }
+            } catch (err) {
+                console.error('Error loading items:', err);
+            }
+        }
+
+        function goHome() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

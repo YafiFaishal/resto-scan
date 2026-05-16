@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resto Scan - Dashboard Kasir</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .kasir-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+        }
+
+        .order-card.pending {
+            border-left-color: #ffc107;
+        }
+
+        .order-card.diproses {
+            border-left-color: #17a2b8;
+        }
+
+        .order-card.siap {
+            border-left-color: #28a745;
+        }
+
+        .order-card.selesai {
+            border-left-color: #6c757d;
+        }
+
+        .order-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .order-info {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .status-current {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 10px 0;
+            color: white;
+        }
+
+        .status-current.pending {
+            background: #ffc107;
+        }
+
+        .status-current.diproses {
+            background: #17a2b8;
+        }
+
+        .status-current.siap {
+            background: #28a745;
+        }
+
+        .status-current.selesai {
+            background: #6c757d;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-status {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f0f0f0;
+            color: #333;
+            min-width: 80px;
+        }
+
+        .btn-status:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-status.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .kasir-header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="kasir-header">
+            <div>
+                <h1>👨‍💼 Dashboard Kasir</h1>
+                <p id="lastUpdate" style="color: #999; font-size: 12px; margin: 5px 0 0 0;">
+                    Auto-refresh setiap 15 detik
+                </p>
+            </div>
+            <div style="display: flex; gap: 30px;">
+                <div class="stat-box">
+                    <div class="stat-number" id="statPending">0</div>
+                    <div class="stat-label">Menunggu</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="statProses">0</div>
+                    <div class="stat-label">Diproses</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="statSiap">0</div>
+                    <div class="stat-label">Siap</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daftar Pesanan -->
+        <div id="ordersList" class="kasir-container">
+            <p>Loading pesanan...</p>
+        </div>
+    </div>
+
+    <script>
+        // Load orders setiap 15 detik
+        loadOrders();
+        setInterval(loadOrders, 15000);
+
+        async function loadOrders() {
+            try {
+                const response = await fetch('http://localhost:3000/api/orders');
+                const data = await response.json();
+
+                if (data.success) {
+                    renderOrders(data.orders);
+                    updateStats(data.orders);
+                    updateLastRefresh();
+                }
+            } catch (err) {
+                console.error('Error loading orders:', err);
+            }
+        }
+
+        function renderOrders(orders) {
+            const ordersList = document.getElementById('ordersList');
+
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<p style="grid-column: 1/-1;">Tidak ada pesanan</p>';
+                return;
+            }
+
+            ordersList.innerHTML = orders.map(order => `
+        <div class="order-card ${order.status}">
+          <h3>Meja ${order.table_number}</h3>
+          <div class="order-info">
+            <strong>${order.customer_name}</strong><br>
+            ID: #${order.id.slice(0, 8).toUpperCase()}<br>
+            ${new Date(order.created_at).toLocaleString('id-ID')}
+          </div>
+          <div class="status-current ${order.status}">
+            ${getStatusLabel(order.status)}
+          </div>
+          <div class="action-buttons">
+            <button class="btn-status ${order.status === 'pending' ? 'active' : ''}" 
+              onclick="updateStatus('${order.id}', 'pending')">Pending</button>
+            <button class="btn-status ${order.status === 'diproses' ? 'active' : ''}" 
+              onclick="updateStatus('${order.id}', 'diproses')">Masak</button>
+            <button class="btn-status ${order.status === 'siap' ? 'active' : ''}" 
+              onclick="updateStatus('${order.id}', 'siap')">Siap</button>
+            <button class="btn-status ${order.status === 'selesai' ? 'active' : ''}" 
+              onclick="updateStatus('${order.id}', 'selesai')">Selesai</button>
+          </div>
+        </div>
+      `).join('');
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'pending': '⏳ Menunggu',
+                'diproses': '👨‍🍳 Diproses',
+                'siap': '✅ Siap',
+                'selesai': '🎉 Selesai'
+            };
+            return labels[status] || status;
+        }
+
+        async function updateStatus(orderId, newStatus) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/orders/${orderId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    loadOrders(); // Refresh daftar
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (err) {
+                console.error('Error updating status:', err);
+                alert('Gagal update status');
+            }
+        }
+
+        function updateStats(orders) {
+            const statPending = orders.filter(o => o.status === 'pending').length;
+            const statProses = orders.filter(o => o.status === 'diproses').length;
+            const statSiap = orders.filter(o => o.status === 'siap').length;
+
+            document.getElementById('statPending').textContent = statPending;
+            document.getElementById('statProses').textContent = statProses;
+            document.getElementById('statSiap').textContent = statSiap;
+        }
+
+        function updateLastRefresh() {
+            const now = new Date().toLocaleTimeString('id-ID');
+            document.getElementById('lastUpdate').textContent = `Update terakhir: ${now}`;
+        }
+    </script>
+</body>
+
+</html>
