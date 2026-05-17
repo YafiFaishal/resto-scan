@@ -186,15 +186,23 @@
         }
 
         .item-row {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 24px 1fr 50px 100px;
             align-items: center;
+            gap: var(--spacing-sm);
             padding: var(--spacing-sm) 0;
             border-bottom: 1px solid rgba(0,0,0,0.04);
         }
 
         .item-row:last-child {
             border-bottom: none;
+        }
+
+        .item-num {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-secondary);
+            text-align: center;
         }
 
         .item-name {
@@ -210,12 +218,15 @@
             font-size: 0.75rem;
             font-weight: 600;
             color: var(--color-secondary);
+            text-align: center;
+            justify-self: center;
         }
 
         .item-price {
             font-weight: 600;
             color: var(--color-tertiary);
             font-size: 0.9rem;
+            text-align: right;
         }
 
         .total-row {
@@ -444,12 +455,16 @@
                 const data = await response.json();
 
                 if (data.success && data.items.length > 0) {
+                    // Sort items alphabetically by name
+                    const sortedItems = [...data.items].sort((a, b) => a.menu_name.localeCompare(b.menu_name));
+
                     let total = 0;
-                    const itemsHtml = data.items.map(item => {
+                    const itemsHtml = sortedItems.map((item, idx) => {
                         const subtotal = item.price * item.quantity;
                         total += subtotal;
                         return `
                         <div class="item-row">
+                            <span class="item-num">${idx + 1}.</span>
                             <span class="item-name">${item.menu_name}</span>
                             <span class="item-qty">${item.quantity}x</span>
                             <span class="item-price">Rp ${subtotal.toLocaleString('id-ID')}</span>
