@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -16,8 +17,11 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>📋 Menu Kami</h1>
-            <p>Meja <span id="displayTable"></span> — <span id="displayName"></span></p>
+            <div class="header-info">
+                <img src="/images/logo.svg" alt="RestoScan Logo" class="brand-logo">
+                <h1>Menu Kami</h1>
+                <p>Meja <span id="displayTable"></span> — <span id="displayName"></span></p>
+            </div>
             <button class="btn btn-secondary" onclick="goBack()">← Kembali</button>
         </div>
 
@@ -28,7 +32,7 @@
 
         <!-- Keranjang (Fixed di bawah) -->
         <div class="cart-container">
-            <h3>🛒 Keranjang Saya</h3>
+            <h3>Keranjang Saya</h3>
             <div id="cartItems" class="cart-items">
                 <p class="empty-cart">Belum ada item</p>
             </div>

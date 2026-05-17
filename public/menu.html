@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -16,8 +17,11 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>📋 Menu Kami</h1>
-            <p>Meja <span id="displayTable"></span> — <span id="displayName"></span></p>
+            <div class="header-info">
+                <img src="/images/logo.svg" alt="RestoScan Logo" class="brand-logo">
+                <h1>Menu Kami</h1>
+                <p>Meja <span id="displayTable"></span> — <span id="displayName"></span></p>
+            </div>
             <button class="btn btn-secondary" onclick="goBack()">← Kembali</button>
         </div>
 
@@ -28,7 +32,7 @@
 
         <!-- Keranjang (Fixed di bawah) -->
         <div class="cart-container">
-            <h3>🛒 Keranjang Saya</h3>
+            <h3>Keranjang Saya</h3>
             <div id="cartItems" class="cart-items">
                 <p class="empty-cart">Belum ada item</p>
             </div>
@@ -64,36 +68,16 @@
             }
         }
 
-        // Fallback image map — digunakan jika image_url di database masih placeholder
-        const MENU_IMAGE_FALLBACK = {
-            'nasi goreng': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&h=450&fit=crop&q=80',
-            'mie ayam': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600&h=450&fit=crop&q=80',
-            'lumpia goreng': 'https://images.unsplash.com/photo-1548507200-84bcab4753e6?w=600&h=450&fit=crop&q=80',
-            'es cendol': 'https://images.unsplash.com/photo-1615478503562-ec2d8aa0a7e6?w=600&h=450&fit=crop&q=80',
-            'soto ayam': 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&h=450&fit=crop&q=80',
-        };
-
-        function getMenuImage(menu) {
-            // Jika image_url valid (bukan placeholder), gunakan dari database
-            if (menu.image_url && !menu.image_url.includes('placeholder')) {
-                return menu.image_url;
-            }
-            // Cari fallback berdasarkan nama menu (case-insensitive)
-            const key = menu.name.toLowerCase();
-            return MENU_IMAGE_FALLBACK[key] || `https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=450&fit=crop&q=80`;
-        }
-
         // Render daftar menu
         function renderMenus(menus) {
             const menuList = document.getElementById('menuList');
             menuList.innerHTML = '';
 
             menus.forEach(menu => {
-                const imgUrl = getMenuImage(menu);
                 const card = document.createElement('div');
                 card.className = 'menu-card';
                 card.innerHTML = `
-          <img src="${imgUrl}" alt="${menu.name}" loading="lazy">
+          <img src="${menu.image_url}" alt="${menu.name}">
           <h3>${menu.name}</h3>
           <p class="category">${menu.category}</p>
           <p class="description">${menu.description}</p>
