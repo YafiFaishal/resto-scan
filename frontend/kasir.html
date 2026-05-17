@@ -175,7 +175,7 @@
 
         async function loadOrders() {
             try {
-                const response = await fetch('http://localhost:3000/api/orders');
+                const response = await fetch('http://resto-scan.railway.internal/api/orders');
                 const data = await response.json();
 
                 if (data.success) {
@@ -233,7 +233,7 @@
 
         async function updateStatus(orderId, newStatus) {
             try {
-                const response = await fetch(`http://localhost:3000/api/orders/${orderId}`, {
+                const response = await fetch(`http://resto-scan.railway.internal/api/orders/${orderId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
