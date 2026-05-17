@@ -16,25 +16,21 @@
 </head>
 
 <body>
-    <div class="bg-overlay"></div>
+    <!-- Cafe Background (blurred) -->
+    <div class="bg-overlay" style="background-image: url('/images/cafe-bg.png');"></div>
     <div class="bg-gradient"></div>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-info">
-                <img src="/images/logo.svg" alt="RestoScan Logo" class="brand-logo">
-                <h1>Menu Kami</h1>
-                <p>Meja <span id="displayTable"></span> — <span id="displayName"></span></p>
-            </div>
-            <button class="btn btn-secondary" onclick="goBack()">← Kembali</button>
-        </div>
 
-        <!-- Hero Banner -->
+    <div class="container">
+        <!-- Hero Section (merged with header) -->
         <div class="hero-banner">
             <img src="/images/hero-banner.png" alt="RestoScan Banner" class="hero-img">
             <div class="hero-overlay">
-                <h2 class="hero-title">Selamat Datang! 👋</h2>
-                <p class="hero-subtitle">Pilih hidangan favorit kamu, langsung dari meja.</p>
+                <div class="hero-top">
+                    <img src="/images/logo.svg" alt="RestoScan Logo" class="hero-logo">
+                    <button class="btn-back" onclick="goBack()">← Kembali</button>
+                </div>
+                <h1 class="hero-title">Menu Kami</h1>
+                <p class="hero-subtitle">Meja <span id="displayTable"></span> — <span id="displayName"></span></p>
                 <div class="hero-badges">
                     <span class="hero-badge">🍜 30+ Menu</span>
                     <span class="hero-badge">⚡ Pesan Cepat</span>
@@ -43,8 +39,16 @@
             </div>
         </div>
 
+        <!-- Category Filter Tabs -->
+        <div class="category-tabs-wrapper">
+            <div class="category-tabs" id="categoryTabs">
+                <button class="cat-tab active" data-cat="all" onclick="filterCategory('all', this)">🍽️ Semua</button>
+                <button class="cat-tab" data-cat="favorites" onclick="filterCategory('favorites', this)">🔥 Paling Favorit</button>
+            </div>
+        </div>
+
         <!-- Daftar Menu -->
-        <div id="menuList" class="menu-grid">
+        <div id="menuList" class="menu-container">
             <p>Loading menu...</p>
         </div>
 
@@ -71,6 +75,21 @@
         document.getElementById('displayName').textContent = customerName;
         document.getElementById('displayTable').textContent = tableNumber;
 
+        // Store all menus globally so we can filter without re-fetching
+        let allMenus = [];
+
+        // Category emoji mapping for visual flair
+        const categoryEmojis = {
+            'Appetizer': '🥗',
+            'Dessert': '🍰',
+            'Makanan Ringan': '🍢',
+            'Mie': '🍜',
+            'Nasi': '🍚',
+            'Sup': '🍲',
+            'Minuman Dingin': '🧊',
+            'Minuman Panas': '☕',
+        };
+
         // Ambil menu dari API
         async function loadMenus() {
             try {
@@ -78,7 +97,9 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    renderMenus(data.data);
+                    allMenus = data.data;
+                    buildCategoryTabs(allMenus);
+                    renderMenus(allMenus, 'all');
                 }
             } catch (err) {
                 console.error('Error loading menus:', err);
@@ -86,34 +107,117 @@
             }
         }
 
-        // Render daftar menu
-        function renderMenus(menus) {
+        // Build dynamic category tabs from data
+        function buildCategoryTabs(menus) {
+            const tabsContainer = document.getElementById('categoryTabs');
+            const categories = [...new Set(menus.map(m => m.category))].sort();
+
+            categories.forEach(cat => {
+                const emoji = categoryEmojis[cat] || '📦';
+                const btn = document.createElement('button');
+                btn.className = 'cat-tab';
+                btn.dataset.cat = cat;
+                btn.textContent = `${emoji} ${cat}`;
+                btn.onclick = function () { filterCategory(cat, this); };
+                tabsContainer.appendChild(btn);
+            });
+        }
+
+        // Filter by category
+        function filterCategory(cat, btnEl) {
+            // Update active tab
+            document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+
+            renderMenus(allMenus, cat);
+
+            // Scroll to top of menu area smoothly
+            document.getElementById('menuList').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Create a single menu card element
+        function createMenuCard(menu) {
+            const rating = (4.3 + Math.random() * 0.6).toFixed(1);
+            const starsHTML = '<span class="stars">★★★★★</span> <span class="rating-text">(' + rating + ')</span>';
+
+            const card = document.createElement('div');
+            card.className = 'menu-card';
+            card.innerHTML = `
+                <div class="img-wrapper">
+                    <img src="${menu.image_url}" alt="${menu.name}" loading="lazy">
+                </div>
+                <h3>${menu.name}</h3>
+                <p class="category">${menu.category}</p>
+                <div class="rating-row">${starsHTML}</div>
+                <p class="description">${menu.description}</p>
+                <p class="price">Rp ${menu.price.toLocaleString('id-ID')}</p>
+                <button class="btn btn-add" onclick="addToCart('${menu.id}', '${menu.name}', ${menu.price})">
+                    + Tambah
+                </button>
+            `;
+            return card;
+        }
+
+        // Render menus grouped by category
+        function renderMenus(menus, activeFilter) {
             const menuList = document.getElementById('menuList');
             menuList.innerHTML = '';
 
-            menus.forEach(menu => {
-                const rating = (4.3 + Math.random() * 0.6).toFixed(1);
-                const isBestSeller = menu.price >= 30000 && Math.random() > 0.3; // Give best seller logic to some items
-                const bestSellerHTML = isBestSeller ? '<div class="best-seller">🌟 Best Seller</div>' : '';
-                const starsHTML = '<span class="stars">★★★★★</span> <span class="rating-text">(' + rating + ')</span>';
+            // --- "Paling Favorit" Section ---
+            if (activeFilter === 'all' || activeFilter === 'favorites') {
+                const favorites = [...menus]
+                    .sort((a, b) => b.price - a.price)
+                    .slice(0, 6);
 
-                const card = document.createElement('div');
-                card.className = 'menu-card';
-                card.innerHTML = `
-          <div class="img-wrapper">
-            <img src="${menu.image_url}" alt="${menu.name}">
-            ${bestSellerHTML}
-          </div>
-          <h3>${menu.name}</h3>
-          <p class="category">${menu.category}</p>
-          <div class="rating-row">${starsHTML}</div>
-          <p class="description">${menu.description}</p>
-          <p class="price">Rp ${menu.price.toLocaleString('id-ID')}</p>
-          <button class="btn btn-add" onclick="addToCart('${menu.id}', '${menu.name}', ${menu.price})">
-            + Tambah
-          </button>
-        `;
-                menuList.appendChild(card);
+                const favSection = document.createElement('div');
+                favSection.className = 'menu-section';
+
+                const favTitle = document.createElement('h2');
+                favTitle.className = 'category-title';
+                favTitle.innerHTML = '🔥 Paling Favorit';
+                favSection.appendChild(favTitle);
+
+                const favGrid = document.createElement('div');
+                favGrid.className = 'menu-grid';
+                favorites.forEach(menu => favGrid.appendChild(createMenuCard(menu)));
+                favSection.appendChild(favGrid);
+                menuList.appendChild(favSection);
+
+                if (activeFilter === 'favorites') return;
+            }
+
+            // --- Grouped by Category ---
+            let filtered = menus;
+            if (activeFilter !== 'all' && activeFilter !== 'favorites') {
+                filtered = menus.filter(m => m.category === activeFilter);
+            }
+
+            const grouped = {};
+            filtered.forEach(menu => {
+                const cat = menu.category || 'Lainnya';
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(menu);
+            });
+
+            const sortedCategories = Object.keys(grouped).sort();
+
+            sortedCategories.forEach(cat => {
+                const emoji = categoryEmojis[cat] || '📦';
+
+                const section = document.createElement('div');
+                section.className = 'menu-section';
+
+                const title = document.createElement('h2');
+                title.className = 'category-title';
+                title.innerHTML = `${emoji} ${cat}`;
+                section.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'menu-grid';
+                grouped[cat].forEach(menu => grid.appendChild(createMenuCard(menu)));
+                section.appendChild(grid);
+
+                menuList.appendChild(section);
             });
         }
 
