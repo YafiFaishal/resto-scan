@@ -92,7 +92,7 @@
         async function loadOrderStatus() {
             try {
                 // Ambil data order
-                const response = await fetch(`http://localhost:3000/api/orders/${orderId}`);
+                const response = await fetch(`http://resto-scan.railway.internal/api/orders/${orderId}`);
                 const data = await response.json();
 
                 if (data.success) {
@@ -137,7 +137,7 @@
 
         async function loadOrderItems(orderId) {
             try {
-                const response = await fetch(`http://localhost:3000/api/orders/${orderId}/items`);
+                const response = await fetch(`http://resto-scan.railway.internal/api/orders/${orderId}/items`);
                 const data = await response.json();
 
                 if (data.success) {

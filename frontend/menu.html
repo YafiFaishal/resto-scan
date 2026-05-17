@@ -47,7 +47,7 @@
         // Ambil menu dari API
         async function loadMenus() {
             try {
-                const response = await fetch('http://localhost:3000/api/menus');
+                const response = await fetch('http://resto-scan.railway.internal/api/menus');
                 const data = await response.json();
 
                 if (data.success) {
