@@ -364,13 +364,25 @@ code {
 }
 
 .cart-item {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 2.5fr auto 1.5fr auto;
     align-items: center;
+    gap: var(--spacing-sm);
     padding: var(--spacing-sm) 0;
     border-bottom: 1px solid rgba(250, 247, 242, 0.12);
     font-size: 0.9rem;
     color: var(--color-neutral);
+}
+
+.cart-item > span:nth-child(1) {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cart-item > span:nth-child(3) {
+    text-align: right;
 }
 
 .cart-item .qty {
@@ -858,4 +870,70 @@ code {
         padding: var(--spacing-md);
         padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 0px));
     }
+}
+
+/* ===== NEW BACKGROUND & MENU ENHANCEMENTS ===== */
+.bg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=2070&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    z-index: -2;
+    opacity: 0.12;
+    pointer-events: none;
+}
+
+.bg-gradient {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(to bottom, rgba(250,247,242,0) 0%, rgba(250,247,242,1) 60%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.img-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.best-seller {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #FFD700;
+    color: #5C4000;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: var(--rounded-full);
+    box-shadow: var(--shadow-sm);
+    z-index: 2;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.rating-row {
+    padding: 0 var(--spacing-md);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+}
+
+.stars {
+    color: #FFB800;
+    letter-spacing: 1px;
+}
+
+.rating-text {
+    color: var(--color-secondary);
+    font-weight: 600;
 }
