@@ -8,7 +8,9 @@
     <meta name="description" content="Lihat menu restoran dan pesan langsung dari meja Anda.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -74,69 +76,31 @@
         function renderMenus(menus) {
             const menuList = document.getElementById('menuList');
             menuList.innerHTML = '';
-            
-            // Remove menu-grid class from wrapper since we'll use sections
-            menuList.className = 'menu-container';
 
-            // Group menus by category
-            const groupedMenus = menus.reduce((acc, menu) => {
-                const cat = menu.category || 'Lainnya';
-                if (!acc[cat]) {
-                    acc[cat] = [];
-                }
-                acc[cat].push(menu);
-                return acc;
-            }, {});
+            menus.forEach(menu => {
+                const rating = (4.3 + Math.random() * 0.6).toFixed(1);
+                const isBestSeller = menu.price >= 30000 && Math.random() > 0.3; // Give best seller logic to some items
+                const bestSellerHTML = isBestSeller ? '<div class="best-seller">🌟 Best Seller</div>' : '';
+                const starsHTML = '<span class="stars">★★★★★</span> <span class="rating-text">(' + rating + ')</span>';
 
-            for (const category in groupedMenus) {
-                // Create section
-                const section = document.createElement('div');
-                section.className = 'menu-section';
-                
-                // Create Title
-                const title = document.createElement('h2');
-                title.className = 'category-title';
-                title.textContent = category;
-                section.appendChild(title);
-                
-                // Create Grid
-                const grid = document.createElement('div');
-                grid.className = 'menu-grid';
-
-                groupedMenus[category].forEach(menu => {
-                    const rating = (4.3 + Math.random() * 0.6).toFixed(1);
-                    const isBestSeller = menu.price >= 30000 && Math.random() > 0.3;
-                    const bestSellerHTML = isBestSeller ? '<div class="best-seller">🌟 Best Seller</div>' : '';
-                    const starsHTML = '<span class="stars">★★★★★</span> <span class="rating-text">(' + rating + ')</span>';
-
-                    // Ensure image URL correctly points to /images/ if it's just a filename, or keep as is if it's a full URL/path
-                    let imgUrl = menu.image_url;
-                    if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('/')) {
-                        imgUrl = '/images/' + imgUrl;
-                    }
-
-                    const card = document.createElement('div');
-                    card.className = 'menu-card';
-                    card.innerHTML = `
-              <div class="img-wrapper">
-                <img src="${imgUrl}" alt="${menu.name}">
-                ${bestSellerHTML}
-              </div>
-              <h3>${menu.name}</h3>
-              <p class="category">${menu.category}</p>
-              <div class="rating-row">${starsHTML}</div>
-              <p class="description">${menu.description}</p>
-              <p class="price">Rp ${menu.price.toLocaleString('id-ID')}</p>
-              <button class="btn btn-add" onclick="addToCart('${menu.id}', '${menu.name}', ${menu.price})">
-                + Tambah
-              </button>
-            `;
-                    grid.appendChild(card);
-                });
-                
-                section.appendChild(grid);
-                menuList.appendChild(section);
-            }
+                const card = document.createElement('div');
+                card.className = 'menu-card';
+                card.innerHTML = `
+          <div class="img-wrapper">
+            <img src="${menu.image_url}" alt="${menu.name}">
+            ${bestSellerHTML}
+          </div>
+          <h3>${menu.name}</h3>
+          <p class="category">${menu.category}</p>
+          <div class="rating-row">${starsHTML}</div>
+          <p class="description">${menu.description}</p>
+          <p class="price">Rp ${menu.price.toLocaleString('id-ID')}</p>
+          <button class="btn btn-add" onclick="addToCart('${menu.id}', '${menu.name}', ${menu.price})">
+            + Tambah
+          </button>
+        `;
+                menuList.appendChild(card);
+            });
         }
 
         // Tambah item ke keranjang
