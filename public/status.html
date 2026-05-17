@@ -11,27 +11,348 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* ===== STATUS PAGE SPECIFIC ===== */
+        .status-hero {
+            height: 200px;
+        }
+
+        .status-hero .hero-img {
+            height: 200px;
+        }
+
+        /* Progress Tracker */
+        .progress-tracker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: var(--spacing-lg) var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            background: var(--color-surface);
+            border-radius: var(--rounded-xl);
+            box-shadow: var(--shadow-sm);
+            overflow-x: auto;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: 80px;
+            position: relative;
+        }
+
+        .step-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            background: var(--color-surface-dim);
+            color: var(--color-secondary);
+            transition: all 0.4s ease;
+            border: 3px solid transparent;
+        }
+
+        .step-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--color-secondary);
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        .progress-step.completed .step-icon {
+            background: var(--color-tertiary);
+            color: var(--color-on-tertiary);
+            border-color: var(--color-tertiary);
+            box-shadow: 0 0 0 4px rgba(200, 130, 58, 0.15);
+        }
+
+        .progress-step.completed .step-label {
+            color: var(--color-tertiary);
+            font-weight: 700;
+        }
+
+        .progress-step.active .step-icon {
+            background: var(--color-tertiary);
+            color: var(--color-on-tertiary);
+            border-color: var(--color-tertiary);
+            box-shadow: 0 0 0 4px rgba(200, 130, 58, 0.2);
+            animation: pulse-step 2s ease-in-out infinite;
+        }
+
+        .progress-step.active .step-label {
+            color: var(--color-primary);
+            font-weight: 700;
+        }
+
+        @keyframes pulse-step {
+            0%, 100% { box-shadow: 0 0 0 4px rgba(200, 130, 58, 0.2); }
+            50% { box-shadow: 0 0 0 8px rgba(200, 130, 58, 0.1); }
+        }
+
+        .step-connector {
+            width: 40px;
+            height: 3px;
+            background: var(--color-surface-dim);
+            border-radius: 2px;
+            margin-bottom: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .step-connector.done {
+            background: var(--color-tertiary);
+        }
+
+        /* Order Detail Card */
+        .order-detail-card {
+            background: var(--color-surface);
+            border-radius: var(--rounded-xl);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: 120px;
+        }
+
+        .order-detail-header {
+            padding: var(--spacing-lg) var(--spacing-xl);
+            border-bottom: 1px solid var(--color-surface-dim);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+        }
+
+        .order-id-display {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .order-id-display span {
+            color: var(--color-tertiary);
+        }
+
+        .order-time {
+            font-size: 0.78rem;
+            color: var(--color-secondary);
+        }
+
+        .order-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+            padding: var(--spacing-lg) var(--spacing-xl);
+            border-bottom: 1px solid var(--color-surface-dim);
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .meta-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-secondary);
+            font-weight: 600;
+        }
+
+        .meta-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        /* Items Table */
+        .items-section {
+            padding: var(--spacing-lg) var(--spacing-xl);
+        }
+
+        .items-title {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-sm) 0;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-weight: 500;
+            color: var(--color-primary);
+            font-size: 0.9rem;
+        }
+
+        .item-qty {
+            background: var(--color-surface-dim);
+            padding: 2px 10px;
+            border-radius: var(--rounded-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-secondary);
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: var(--color-tertiary);
+            font-size: 0.9rem;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: var(--color-surface-dim);
+            border-top: 2px solid var(--color-tertiary);
+        }
+
+        .total-label {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--color-primary);
+        }
+
+        .total-value {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--color-tertiary);
+        }
+
+        /* Back button fixed at bottom */
+        .status-bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--color-surface);
+            padding: var(--spacing-md) var(--spacing-lg);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+            z-index: 20;
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+        }
+
+        .status-bottom-bar .btn {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        @media (max-width: 768px) {
+            .order-meta {
+                grid-template-columns: 1fr;
+                padding: var(--spacing-md) var(--spacing-lg);
+            }
+
+            .order-detail-header {
+                padding: var(--spacing-md) var(--spacing-lg);
+            }
+
+            .items-section {
+                padding: var(--spacing-md) var(--spacing-lg);
+            }
+
+            .step-connector {
+                width: 24px;
+            }
+
+            .progress-step {
+                min-width: 60px;
+            }
+
+            .step-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+
+            .step-label {
+                font-size: 0.58rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <div class="bg-overlay"></div>
+    <!-- Cafe Background (blurred) -->
+    <div class="bg-overlay" style="background-image: url('/images/cafe-bg.png');"></div>
     <div class="bg-gradient"></div>
+
     <div class="container">
-        <div class="header">
-            <div class="header-info">
-                <img src="/images/logo.svg" alt="RestoScan Logo" class="brand-logo" style="height: 32px; margin-bottom: 4px;">
-                <h1>Status Pesanan</h1>
+        <!-- Hero Banner -->
+        <div class="hero-banner status-hero">
+            <img src="/images/hero-banner.png" alt="RestoScan" class="hero-img">
+            <div class="hero-overlay">
+                <div class="hero-top">
+                    <img src="/images/logo-white.svg" alt="RestoScan Logo" class="hero-logo">
+                </div>
+                <h1 class="hero-title">Status Pesanan</h1>
+                <p class="hero-subtitle">Pesanan kamu sedang diproses, duduk santai ya! ☕</p>
             </div>
-            <button class="btn btn-secondary" onclick="goHome()">← Kembali ke Menu</button>
         </div>
 
-        <div id="orderStatus" class="loading">
-            <p>Mengambil data pesanan...</p>
+        <!-- Progress Tracker -->
+        <div class="progress-tracker" id="progressTracker">
+            <div class="progress-step" id="step-pending">
+                <div class="step-icon">📝</div>
+                <span class="step-label">Dipesan</span>
+            </div>
+            <div class="step-connector" id="conn-1"></div>
+            <div class="progress-step" id="step-diproses">
+                <div class="step-icon">👨‍🍳</div>
+                <span class="step-label">Dimasak</span>
+            </div>
+            <div class="step-connector" id="conn-2"></div>
+            <div class="progress-step" id="step-siap">
+                <div class="step-icon">🍽️</div>
+                <span class="step-label">Siap</span>
+            </div>
+            <div class="step-connector" id="conn-3"></div>
+            <div class="progress-step" id="step-selesai">
+                <div class="step-icon">🎉</div>
+                <span class="step-label">Selesai</span>
+            </div>
+        </div>
+
+        <!-- Order Detail -->
+        <div id="orderStatus">
+            <div class="order-detail-card">
+                <div class="order-detail-header">
+                    <span class="order-id-display">Memuat pesanan...</span>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Fixed bottom bar -->
+    <div class="status-bottom-bar">
+        <button class="btn btn-secondary" onclick="goHome()">← Pesan Lagi</button>
+        <button class="btn btn-primary" onclick="goMenu()">📋 Tambah Menu</button>
+    </div>
+
     <script>
-        // Ambil order_id dari URL parameter
         const params = new URLSearchParams(window.location.search);
         const orderId = params.get('order_id');
         const API_BASE_URL = 'https://resto-scan-production.up.railway.app';
@@ -39,19 +360,45 @@
         if (!orderId) {
             document.getElementById('orderStatus').innerHTML = '<p>Order ID tidak ditemukan</p>';
         } else {
-            // Polling setiap 5 detik untuk update status
             loadOrderStatus();
             setInterval(loadOrderStatus, 5000);
         }
 
+        const statusOrder = ['pending', 'diproses', 'siap', 'selesai'];
+
+        function updateProgressTracker(currentStatus) {
+            const currentIdx = statusOrder.indexOf(currentStatus);
+
+            statusOrder.forEach((s, i) => {
+                const step = document.getElementById(`step-${s}`);
+                step.classList.remove('active', 'completed');
+
+                if (i < currentIdx) {
+                    step.classList.add('completed');
+                } else if (i === currentIdx) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Connectors
+            for (let i = 1; i <= 3; i++) {
+                const conn = document.getElementById(`conn-${i}`);
+                if (i <= currentIdx) {
+                    conn.classList.add('done');
+                } else {
+                    conn.classList.remove('done');
+                }
+            }
+        }
+
         async function loadOrderStatus() {
             try {
-                // Ambil data order
                 const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`);
                 const data = await response.json();
 
                 if (data.success) {
                     renderOrderStatus(data.order);
+                    updateProgressTracker(data.order.status);
                 } else {
                     document.getElementById('orderStatus').innerHTML = `<p>${data.message}</p>`;
                 }
@@ -61,32 +408,33 @@
         }
 
         function renderOrderStatus(order) {
-            const statusClass = `status-${order.status}`;
-            const statusLabel = {
-                'pending': '⏳ Menunggu Dikonfirmasi',
-                'diproses': '👨‍🍳 Sedang Dimasak',
-                'siap': '✅ Siap Dihidangkan',
-                'selesai': '🎉 Selesai'
-            };
-
             const html = `
-        <div class="order-detail">
-          <h2>Pesanan #${order.id.slice(0, 8).toUpperCase()}</h2>
-          <p><strong>Nama:</strong> ${order.customer_name}</p>
-          <p><strong>Meja:</strong> ${order.table_number}</p>
-          <p><strong>Status:</strong> <span class="status-badge ${statusClass}">${statusLabel[order.status] || order.status}</span></p>
-          <p><strong>Waktu:</strong> ${new Date(order.created_at).toLocaleString('id-ID')}</p>
-
-          <div class="order-items">
-            <h3>Item Pesanan:</h3>
-            <div id="itemsList"></div>
-          </div>
-        </div>
-      `;
+            <div class="order-detail-card">
+                <div class="order-detail-header">
+                    <span class="order-id-display">Pesanan <span>#${order.id.slice(0, 8).toUpperCase()}</span></span>
+                    <span class="order-time">🕐 ${new Date(order.created_at).toLocaleString('id-ID')}</span>
+                </div>
+                <div class="order-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Nama</span>
+                        <span class="meta-value">${order.customer_name}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Nomor Meja</span>
+                        <span class="meta-value">Meja ${order.table_number}</span>
+                    </div>
+                </div>
+                <div class="items-section">
+                    <h3 class="items-title">🧾 Item Pesanan</h3>
+                    <div id="itemsList"><p style="color: var(--color-secondary); font-size: 0.85rem;">Memuat item...</p></div>
+                </div>
+                <div class="total-row" id="totalRow" style="display: none;">
+                    <span class="total-label">Total</span>
+                    <span class="total-value" id="totalValue">Rp 0</span>
+                </div>
+            </div>`;
 
             document.getElementById('orderStatus').innerHTML = html;
-
-            // Load order items
             loadOrderItems(order.id);
         }
 
@@ -95,16 +443,22 @@
                 const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/items`);
                 const data = await response.json();
 
-                if (data.success) {
-                    const itemsHtml = data.items.map(item => `
-            <div class="order-item">
-              <span>${item.menu_name}</span>
-              <span>${item.quantity}x</span>
-              <span>Rp ${(item.price * item.quantity).toLocaleString('id-ID')}</span>
-            </div>
-          `).join('');
+                if (data.success && data.items.length > 0) {
+                    let total = 0;
+                    const itemsHtml = data.items.map(item => {
+                        const subtotal = item.price * item.quantity;
+                        total += subtotal;
+                        return `
+                        <div class="item-row">
+                            <span class="item-name">${item.menu_name}</span>
+                            <span class="item-qty">${item.quantity}x</span>
+                            <span class="item-price">Rp ${subtotal.toLocaleString('id-ID')}</span>
+                        </div>`;
+                    }).join('');
 
                     document.getElementById('itemsList').innerHTML = itemsHtml;
+                    document.getElementById('totalRow').style.display = 'flex';
+                    document.getElementById('totalValue').textContent = `Rp ${total.toLocaleString('id-ID')}`;
                 }
             } catch (err) {
                 console.error('Error loading items:', err);
@@ -114,6 +468,10 @@
         function goHome() {
             sessionStorage.clear();
             window.location.href = 'index.html';
+        }
+
+        function goMenu() {
+            window.location.href = 'menu.html';
         }
     </script>
 </body>
