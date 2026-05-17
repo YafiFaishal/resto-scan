@@ -37,19 +37,28 @@
     <!-- DASHBOARD PAGE -->
     <div id="dashboardPage" class="container">
         <!-- Hero Banner (same style as menu) -->
-        <div class="hero-banner">
+        <div class="hero-banner kasir-hero">
             <img src="/images/kasir-banner.png" alt="Dashboard Kasir" class="hero-img">
-            <div class="hero-overlay">
+            <div class="hero-overlay hero-overlay-center">
                 <div class="hero-top">
                     <img src="/images/logo-kasir-white.svg" alt="RestoScan Kasir" class="hero-logo">
                     <button class="btn-back logout-hero" onclick="logout()">🚪 Logout</button>
                 </div>
-                <h1 class="hero-title">Dashboard Kasir</h1>
-                <p class="hero-subtitle" id="lastUpdate">Auto-refresh setiap 15 detik</p>
-                <div class="hero-badges">
-                    <span class="hero-badge stat-badge">⏳ <span id="statPending">0</span> Menunggu</span>
-                    <span class="hero-badge stat-badge">👨‍🍳 <span id="statProses">0</span> Diproses</span>
-                    <span class="hero-badge stat-badge">✅ <span id="statSiap">0</span> Siap</span>
+                <h1 class="hero-title" style="text-align:center;">Dashboard Kasir</h1>
+                <p class="hero-subtitle" id="lastUpdate" style="text-align:center;">Auto-refresh setiap 15 detik</p>
+                <div class="kasir-stats">
+                    <div class="kasir-stat-card">
+                        <span class="kasir-stat-num" id="statPending">0</span>
+                        <span class="kasir-stat-label">⏳ Menunggu</span>
+                    </div>
+                    <div class="kasir-stat-card">
+                        <span class="kasir-stat-num" id="statProses">0</span>
+                        <span class="kasir-stat-label">👨‍🍳 Diproses</span>
+                    </div>
+                    <div class="kasir-stat-card">
+                        <span class="kasir-stat-num" id="statSiap">0</span>
+                        <span class="kasir-stat-label">✅ Siap</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -134,29 +143,58 @@
                 return;
             }
 
-            ordersList.innerHTML = orders.map(order => `
-        <div class="order-card ${order.status}">
-          <h3>Meja ${order.table_number}</h3>
-          <div class="order-info">
-            <strong>${order.customer_name}</strong><br>
-            ID: #${order.id.slice(0, 8).toUpperCase()}<br>
-            ${new Date(order.created_at).toLocaleString('id-ID')}
-          </div>
-          <div class="status-current ${order.status}">
-            ${getStatusLabel(order.status)}
-          </div>
-          <div class="action-buttons">
-            <button class="btn-status ${order.status === 'pending' ? 'active' : ''}" 
-              onclick="updateStatus('${order.id}', 'pending')">Pending</button>
-            <button class="btn-status ${order.status === 'diproses' ? 'active' : ''}" 
-              onclick="updateStatus('${order.id}', 'diproses')">Masak</button>
-            <button class="btn-status ${order.status === 'siap' ? 'active' : ''}" 
-              onclick="updateStatus('${order.id}', 'siap')">Siap</button>
-            <button class="btn-status ${order.status === 'selesai' ? 'active' : ''}" 
-              onclick="updateStatus('${order.id}', 'selesai')">Selesai</button>
-          </div>
-        </div>
-      `).join('');
+            // Sort: active orders first (pending > diproses > siap), then selesai
+            const statusPriority = { 'pending': 0, 'diproses': 1, 'siap': 2, 'selesai': 3 };
+            const sorted = [...orders].sort((a, b) => {
+                const pa = statusPriority[a.status] ?? 99;
+                const pb = statusPriority[b.status] ?? 99;
+                if (pa !== pb) return pa - pb;
+                return new Date(b.created_at) - new Date(a.created_at);
+            });
+
+            const activeOrders = sorted.filter(o => o.status !== 'selesai');
+            const completedOrders = sorted.filter(o => o.status === 'selesai');
+
+            function renderCard(order) {
+                const isDone = order.status === 'selesai';
+                return `
+                <div class="order-card ${order.status} ${isDone ? 'order-done' : ''}">
+                    <h3>Meja ${order.table_number}</h3>
+                    <div class="order-info">
+                        <strong>${order.customer_name}</strong><br>
+                        ID: #${order.id.slice(0, 8).toUpperCase()}<br>
+                        ${new Date(order.created_at).toLocaleString('id-ID')}
+                    </div>
+                    <div class="status-current ${order.status}">
+                        ${getStatusLabel(order.status)}
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-status ${order.status === 'pending' ? 'active' : ''}" 
+                            onclick="updateStatus('${order.id}', 'pending')">Pending</button>
+                        <button class="btn-status ${order.status === 'diproses' ? 'active' : ''}" 
+                            onclick="updateStatus('${order.id}', 'diproses')">Masak</button>
+                        <button class="btn-status ${order.status === 'siap' ? 'active' : ''}" 
+                            onclick="updateStatus('${order.id}', 'siap')">Siap</button>
+                        <button class="btn-status ${order.status === 'selesai' ? 'active' : ''}" 
+                            onclick="updateStatus('${order.id}', 'selesai')">Selesai</button>
+                    </div>
+                </div>`;
+            }
+
+            let html = '';
+
+            // Active orders
+            if (activeOrders.length > 0) {
+                html += activeOrders.map(renderCard).join('');
+            }
+
+            // Separator + completed orders
+            if (completedOrders.length > 0) {
+                html += `<div class="orders-separator"><span>✅ Pesanan Selesai (${completedOrders.length})</span></div>`;
+                html += completedOrders.map(renderCard).join('');
+            }
+
+            ordersList.innerHTML = html;
         }
 
         function getStatusLabel(status) {
