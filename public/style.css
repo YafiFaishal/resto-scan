@@ -937,3 +937,19 @@ code {
     color: var(--color-secondary);
     font-weight: 600;
 }
+
+/* ===== MENU SECTIONS ===== */
+.menu-section {
+    margin-bottom: var(--spacing-2xl);
+}
+
+.category-title {
+    font-family: var(--font-display);
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--color-surface-dim);
+    padding-bottom: var(--spacing-xs);
+    text-transform: capitalize;
+}
