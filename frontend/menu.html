@@ -36,6 +36,7 @@
         // Ambil data pelanggan dari sessionStorage
         const customerName = sessionStorage.getItem('customerName');
         const tableNumber = sessionStorage.getItem('tableNumber');
+        const API_BASE_URL = 'https://resto-scan-production.up.railway.app';
 
         if (!customerName || !tableNumber) {
             window.location.href = 'index.html';
@@ -47,7 +48,7 @@
         // Ambil menu dari API
         async function loadMenus() {
             try {
-                const response = await fetch('http://resto-scan.railway.internal/api/menus');
+                const response = await fetch(`${API_BASE_URL}/api/menus`);
                 const data = await response.json();
 
                 if (data.success) {
@@ -173,7 +174,7 @@
 
             try {
                 // POST ke backend
-                const response = await fetch('http://resto-scan.railway.internal/api/orders', {
+                const response = await fetch(`${API_BASE_URL}/api/orders`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

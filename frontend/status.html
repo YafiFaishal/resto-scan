@@ -80,6 +80,7 @@
         // Ambil order_id dari URL parameter
         const params = new URLSearchParams(window.location.search);
         const orderId = params.get('order_id');
+        const API_BASE_URL = 'https://resto-scan-production.up.railway.app';
 
         if (!orderId) {
             document.getElementById('orderStatus').innerHTML = '<p>Order ID tidak ditemukan</p>';
@@ -92,7 +93,7 @@
         async function loadOrderStatus() {
             try {
                 // Ambil data order
-                const response = await fetch(`http://resto-scan.railway.internal/api/orders/${orderId}`);
+                const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`);
                 const data = await response.json();
 
                 if (data.success) {
@@ -137,7 +138,7 @@
 
         async function loadOrderItems(orderId) {
             try {
-                const response = await fetch(`http://resto-scan.railway.internal/api/orders/${orderId}/items`);
+                const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/items`);
                 const data = await response.json();
 
                 if (data.success) {
