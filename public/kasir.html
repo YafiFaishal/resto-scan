@@ -14,12 +14,14 @@
 </head>
 
 <body>
-    <div class="bg-overlay"></div>
+    <!-- Cafe Background (blurred) -->
+    <div class="bg-overlay" style="background-image: url('/images/cafe-bg.png');"></div>
     <div class="bg-gradient"></div>
+
     <!-- LOGIN PAGE -->
     <div id="loginPage">
         <div class="login-container">
-            <img src="/images/logo.svg" alt="RestoScan Logo" class="brand-logo" style="margin: 0 auto 16px auto; display: block;">
+            <img src="/images/logo-kasir.svg" alt="RestoScan Kasir" class="brand-logo" style="margin: 0 auto 16px auto; display: block;">
             <h1>Kasir Login</h1>
             <p>Masukkan password untuk akses dashboard</p>
 
@@ -34,31 +36,21 @@
 
     <!-- DASHBOARD PAGE -->
     <div id="dashboardPage" class="container">
-        <!-- Header -->
-        <div class="kasir-header">
-            <div class="header-info">
-                <img src="/images/logo.svg" alt="RestoScan Logo" class="brand-logo" style="height: 32px; margin-bottom: 4px;">
-                <h1>Dashboard Kasir</h1>
-                <p id="lastUpdate" style="color: var(--color-secondary); font-size: 0.8rem; margin: 5px 0 0 0;">
-                    Auto-refresh setiap 15 detik
-                </p>
-            </div>
-            <div style="display: flex; gap: 30px; align-items: center;">
-                <div style="display: flex; gap: 30px;">
-                    <div class="stat-box">
-                        <div class="stat-number" id="statPending">0</div>
-                        <div class="stat-label">Menunggu</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-number" id="statProses">0</div>
-                        <div class="stat-label">Diproses</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-number" id="statSiap">0</div>
-                        <div class="stat-label">Siap</div>
-                    </div>
+        <!-- Hero Banner (same style as menu) -->
+        <div class="hero-banner">
+            <img src="/images/kasir-banner.png" alt="Dashboard Kasir" class="hero-img">
+            <div class="hero-overlay">
+                <div class="hero-top">
+                    <img src="/images/logo-kasir-white.svg" alt="RestoScan Kasir" class="hero-logo">
+                    <button class="btn-back logout-hero" onclick="logout()">🚪 Logout</button>
                 </div>
-                <button class="logout-btn" onclick="logout()">Logout</button>
+                <h1 class="hero-title">Dashboard Kasir</h1>
+                <p class="hero-subtitle" id="lastUpdate">Auto-refresh setiap 15 detik</p>
+                <div class="hero-badges">
+                    <span class="hero-badge stat-badge">⏳ <span id="statPending">0</span> Menunggu</span>
+                    <span class="hero-badge stat-badge">👨‍🍳 <span id="statProses">0</span> Diproses</span>
+                    <span class="hero-badge stat-badge">✅ <span id="statSiap">0</span> Siap</span>
+                </div>
             </div>
         </div>
 

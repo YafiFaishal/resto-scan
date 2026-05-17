@@ -329,6 +329,20 @@ code {
     letter-spacing: 0.02em;
 }
 
+.stat-badge {
+    font-size: 0.75rem;
+    padding: 6px 14px;
+}
+
+.logout-hero {
+    background: rgba(186, 26, 26, 0.25) !important;
+    border-color: rgba(255, 100, 100, 0.3) !important;
+}
+
+.logout-hero:hover {
+    background: rgba(186, 26, 26, 0.45) !important;
+}
+
 @media (max-width: 768px) {
     .hero-img {
         height: 200px;
