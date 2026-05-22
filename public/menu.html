@@ -57,29 +57,24 @@
         <div class="cart-container" id="cartContainer">
             <!-- Collapsed Bar (tap to expand) -->
             <div class="cart-collapsed" id="cartCollapsed" onclick="expandCart()">
-                <div class="cart-handle"></div>
                 <div class="cart-collapsed-content">
-                    <div class="cart-collapsed-left">
-                        <span class="cart-icon">🛒</span>
-                        <span class="cart-count" id="cartCount">0 item</span>
-                        <span class="cart-total" id="cartTotalCollapsed">· Rp 0</span>
-                    </div>
+                    <span class="cart-icon">🛒</span>
+                    <span class="cart-count" id="cartCount">0 item</span>
+                    <span class="cart-divider">•</span>
+                    <span class="cart-total" id="cartTotalCollapsed">Rp 0</span>
                     <button class="btn-cart-checkout" onclick="event.stopPropagation(); checkout()">
-                        Pesan <span id="cartTotalBtnCollapsed">Rp 0</span>
+                        Pesan
                     </button>
                 </div>
             </div>
 
             <!-- Expanded Content -->
             <div class="cart-expanded" id="cartExpanded">
-                <div class="cart-header">
-                    <h3>Keranjang Saya</h3>
-                    <button class="btn-collapse" onclick="collapseCart()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="18 15 12 9 6 15"></polyline>
-                        </svg>
-                    </button>
-                </div>
+                <button class="btn-collapse" onclick="collapseCart()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                </button>
                 <div id="cartItems" class="cart-items">
                     <p class="empty-cart">Belum ada item</p>
                 </div>
@@ -275,27 +270,23 @@
             const cartItems = document.getElementById('cartItems');
             const cartContainer = document.getElementById('cartContainer');
             const collapsedBar = document.getElementById('cartCollapsed');
-            const expandedContent = document.getElementById('cartExpanded');
 
             // Calculate totals
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
             // Update collapsed bar
-            document.getElementById('cartCount').textContent = totalItems === 0 ? '0 item' : `${totalItems} item`;
-            document.getElementById('cartTotalCollapsed').textContent = totalItems === 0 ? '· Rp 0' : `· Rp ${totalPrice.toLocaleString('id-ID')}`;
-            document.getElementById('cartTotalBtnCollapsed').textContent = `Rp ${totalPrice.toLocaleString('id-ID')}`;
+            document.getElementById('cartCount').textContent = `${totalItems} item`;
+            document.getElementById('cartTotalCollapsed').textContent = `Rp ${totalPrice.toLocaleString('id-ID')}`;
 
             // Update expanded total
             document.getElementById('cartTotalExpanded').textContent = `Rp ${totalPrice.toLocaleString('id-ID')}`;
 
-            // Show/hide cart container based on items
+            // Show/hide cart bar based on items
             if (cart.length === 0) {
-                cartContainer.classList.add('empty');
-                collapsedBar.classList.remove('has-items');
+                collapsedBar.style.display = 'none';
             } else {
-                cartContainer.classList.remove('empty');
-                collapsedBar.classList.add('has-items');
+                collapsedBar.style.display = 'flex';
             }
 
             // Render items in expanded view
@@ -339,18 +330,6 @@
             const cartContainer = document.getElementById('cartContainer');
             cartContainer.classList.remove('expanded');
         }
-
-        // Close cart when clicking outside (optional - for better UX)
-        document.addEventListener('click', (e) => {
-            const cartContainer = document.getElementById('cartContainer');
-            const menuList = document.getElementById('menuList');
-
-            if (cartContainer.classList.contains('expanded') &&
-                !cartContainer.contains(e.target) &&
-                menuList.contains(e.target)) {
-                collapseCart();
-            }
-        });
 
         // Hapus dari keranjang
         function removeFromCart(index) {
