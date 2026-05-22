@@ -26,7 +26,7 @@
             <img src="/images/hero-banner.png" alt="RestoScan Banner" class="hero-img">
             <div class="hero-overlay">
                 <div class="hero-top">
-                    <img src="/images/logo-white.svg" alt="RestoScan Logo" class="hero-logo">
+                    <img src="/images/logo.svg" alt="RestoScan Logo" class="hero-logo">
                     <button class="btn-back" onclick="goBack()">← Kembali</button>
                 </div>
                 <h1 class="hero-title">Menu Kami</h1>
@@ -43,7 +43,8 @@
         <div class="category-tabs-wrapper">
             <div class="category-tabs" id="categoryTabs">
                 <button class="cat-tab active" data-cat="all" onclick="filterCategory('all', this)">🍽️ Semua</button>
-                <button class="cat-tab" data-cat="favorites" onclick="filterCategory('favorites', this)">🔥 Paling Favorit</button>
+                <button class="cat-tab" data-cat="favorites" onclick="filterCategory('favorites', this)">🔥 Paling
+                    Favorit</button>
             </div>
         </div>
 
@@ -52,13 +53,44 @@
             <p>Loading menu...</p>
         </div>
 
-        <!-- Keranjang (Fixed di bawah) -->
-        <div class="cart-container">
-            <h3>Keranjang Saya</h3>
-            <div id="cartItems" class="cart-items">
-                <p class="empty-cart">Belum ada item</p>
+        <!-- Keranjang (Fixed di bawah, collapsible) -->
+        <div class="cart-container" id="cartContainer">
+            <!-- Collapsed Bar (tap to expand) -->
+            <div class="cart-collapsed" id="cartCollapsed" onclick="expandCart()">
+                <div class="cart-handle"></div>
+                <div class="cart-collapsed-content">
+                    <div class="cart-collapsed-left">
+                        <span class="cart-icon">🛒</span>
+                        <span class="cart-count" id="cartCount">0 item</span>
+                        <span class="cart-total" id="cartTotalCollapsed">· Rp 0</span>
+                    </div>
+                    <button class="btn-cart-checkout" onclick="event.stopPropagation(); checkout()">
+                        Pesan <span id="cartTotalBtnCollapsed">Rp 0</span>
+                    </button>
+                </div>
             </div>
-            <button class="btn btn-primary" onclick="checkout()">Pesan Sekarang</button>
+
+            <!-- Expanded Content -->
+            <div class="cart-expanded" id="cartExpanded">
+                <div class="cart-header">
+                    <h3>Keranjang Saya</h3>
+                    <button class="btn-collapse" onclick="collapseCart()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div id="cartItems" class="cart-items">
+                    <p class="empty-cart">Belum ada item</p>
+                </div>
+                <div class="cart-footer">
+                    <div class="cart-summary">
+                        <span class="summary-label">Total</span>
+                        <span class="summary-value" id="cartTotalExpanded">Rp 0</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="checkout()">Pesan Sekarang</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -241,25 +273,84 @@
         function renderCart() {
             const cart = JSON.parse(sessionStorage.getItem('cart') || '[]');
             const cartItems = document.getElementById('cartItems');
+            const cartContainer = document.getElementById('cartContainer');
+            const collapsedBar = document.getElementById('cartCollapsed');
+            const expandedContent = document.getElementById('cartExpanded');
 
+            // Calculate totals
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            // Update collapsed bar
+            document.getElementById('cartCount').textContent = totalItems === 0 ? '0 item' : `${totalItems} item`;
+            document.getElementById('cartTotalCollapsed').textContent = totalItems === 0 ? '· Rp 0' : `· Rp ${totalPrice.toLocaleString('id-ID')}`;
+            document.getElementById('cartTotalBtnCollapsed').textContent = `Rp ${totalPrice.toLocaleString('id-ID')}`;
+
+            // Update expanded total
+            document.getElementById('cartTotalExpanded').textContent = `Rp ${totalPrice.toLocaleString('id-ID')}`;
+
+            // Show/hide cart container based on items
+            if (cart.length === 0) {
+                cartContainer.classList.add('empty');
+                collapsedBar.classList.remove('has-items');
+            } else {
+                cartContainer.classList.remove('empty');
+                collapsedBar.classList.add('has-items');
+            }
+
+            // Render items in expanded view
             if (cart.length === 0) {
                 cartItems.innerHTML = '<p class="empty-cart">Belum ada item</p>';
                 return;
             }
 
             cartItems.innerHTML = cart.map((item, index) => `
-        <div class="cart-item">
-          <span>${item.name}</span>
-          <span class="qty">
-            <button onclick="decreaseQty(${index})">-</button>
-            ${item.quantity}
-            <button onclick="increaseQty(${index})">+</button>
-          </span>
-          <span>Rp ${(item.price * item.quantity).toLocaleString('id-ID')}</span>
-          <button class="btn-remove" onclick="removeFromCart(${index})">❌</button>
-        </div>
-      `).join('');
+                <div class="cart-item">
+                    <span class="cart-item-name">${item.name}</span>
+                    <div class="cart-item-controls">
+                        <div class="qty">
+                            <button class="qty-btn" onclick="decreaseQty(${index})">-</button>
+                            <span class="qty-num">${item.quantity}</span>
+                            <button class="qty-btn" onclick="increaseQty(${index})">+</button>
+                        </div>
+                        <span class="cart-item-price">Rp ${(item.price * item.quantity).toLocaleString('id-ID')}</span>
+                        <button class="btn-remove" onclick="removeFromCart(${index})">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
+
+        // Expand cart
+        function expandCart() {
+            const cart = JSON.parse(sessionStorage.getItem('cart') || '[]');
+            if (cart.length === 0) return;
+
+            const cartContainer = document.getElementById('cartContainer');
+            cartContainer.classList.add('expanded');
+        }
+
+        // Collapse cart
+        function collapseCart() {
+            const cartContainer = document.getElementById('cartContainer');
+            cartContainer.classList.remove('expanded');
+        }
+
+        // Close cart when clicking outside (optional - for better UX)
+        document.addEventListener('click', (e) => {
+            const cartContainer = document.getElementById('cartContainer');
+            const menuList = document.getElementById('menuList');
+
+            if (cartContainer.classList.contains('expanded') &&
+                !cartContainer.contains(e.target) &&
+                menuList.contains(e.target)) {
+                collapseCart();
+            }
+        });
 
         // Hapus dari keranjang
         function removeFromCart(index) {
