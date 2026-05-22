@@ -55,30 +55,33 @@
 
         <!-- Keranjang (Fixed di bawah, collapsible) -->
         <div class="cart-container" id="cartContainer">
-            <!-- Collapsed Bar (tap to expand) -->
-            <div class="cart-collapsed" id="cartCollapsed" onclick="expandCart()">
-                <div class="cart-collapsed-content">
+            <!-- Cart Header Bar (Always visible, clickable) -->
+            <div class="cart-header-bar" id="cartHeaderBar" onclick="toggleCart()">
+                <div class="cart-header-left">
+                    <span class="cart-chevron" id="cartChevron">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </span>
                     <span class="cart-icon">🛒</span>
                     <span class="cart-count" id="cartCount">0 item</span>
                     <span class="cart-divider">•</span>
                     <span class="cart-total" id="cartTotalCollapsed">Rp 0</span>
-                    <button class="btn-cart-checkout" onclick="event.stopPropagation(); checkout()">
-                        Pesan
-                    </button>
                 </div>
+                <button class="btn-cart-checkout" id="btnCheckout" onclick="event.stopPropagation(); checkout()">
+                    Pesan
+                </button>
             </div>
 
-            <!-- Expanded Content -->
-            <div class="cart-expanded" id="cartExpanded">
-                <div id="cartItems" class="cart-items">
-                    <p class="empty-cart">Belum ada item</p>
+            <!-- Expanded Cart Detail (Scrollable) -->
+            <div class="cart-detail" id="cartDetail">
+                <div class="cart-items-wrapper">
+                    <div id="cartItems" class="cart-items">
+                        <p class="empty-cart">Pilih menu untuk memesan</p>
+                    </div>
+                    <div class="cart-scroll-indicator" id="cartScrollIndicator"></div>
                 </div>
                 <div class="cart-footer">
-                    <button class="btn-collapse" onclick="collapseCart()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <polyline points="18 15 12 9 6 15"></polyline>
-                        </svg>
-                    </button>
                     <div class="cart-summary">
                         <span class="summary-label">Total</span>
                         <span class="summary-value" id="cartTotalExpanded">Rp 0</span>
@@ -269,7 +272,9 @@
             const cart = JSON.parse(sessionStorage.getItem('cart') || '[]');
             const cartItems = document.getElementById('cartItems');
             const cartContainer = document.getElementById('cartContainer');
-            const collapsedBar = document.getElementById('cartCollapsed');
+            const cartHeaderBar = document.getElementById('cartHeaderBar');
+            const btnCheckout = document.getElementById('btnCheckout');
+            const cartScrollIndicator = document.getElementById('cartScrollIndicator');
 
             // Calculate totals
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -282,16 +287,20 @@
             // Update expanded total
             document.getElementById('cartTotalExpanded').textContent = `Rp ${totalPrice.toLocaleString('id-ID')}`;
 
-            // Show/hide cart bar based on items
+            // Show/hide cart header bar & checkout button based on items
             if (cart.length === 0) {
-                collapsedBar.style.display = 'none';
+                cartHeaderBar.classList.add('empty');
+                btnCheckout.classList.add('disabled');
+                cartContainer.classList.remove('expanded');
             } else {
-                collapsedBar.style.display = 'flex';
+                cartHeaderBar.classList.remove('empty');
+                btnCheckout.classList.remove('disabled');
             }
 
             // Render items in expanded view
             if (cart.length === 0) {
-                cartItems.innerHTML = '<p class="empty-cart">Belum ada item</p>';
+                cartItems.innerHTML = '<p class="empty-cart">Pilih menu untuk memesan</p>';
+                cartScrollIndicator.style.display = 'none';
                 return;
             }
 
@@ -306,7 +315,7 @@
                         </div>
                         <span class="cart-item-price">Rp ${(item.price * item.quantity).toLocaleString('id-ID')}</span>
                         <button class="btn-remove" onclick="removeFromCart(${index})">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -314,6 +323,32 @@
                     </div>
                 </div>
             `).join('');
+
+            // Show scroll indicator if more than 3 items
+            const cartItemsWrapper = document.querySelector('.cart-items-wrapper');
+            if (cart.length > 3) {
+                cartScrollIndicator.style.display = 'block';
+                if (cartItemsWrapper) cartItemsWrapper.classList.add('has-scroll');
+            } else {
+                cartScrollIndicator.style.display = 'none';
+                if (cartItemsWrapper) cartItemsWrapper.classList.remove('has-scroll');
+            }
+        }
+
+        // Toggle cart expand/collapse
+        function toggleCart() {
+            const cartContainer = document.getElementById('cartContainer');
+            const cartChevron = document.getElementById('cartChevron');
+
+            if (cartContainer.classList.contains('expanded')) {
+                cartContainer.classList.remove('expanded');
+                cartChevron.style.transform = 'rotate(0deg)';
+            } else {
+                const cart = JSON.parse(sessionStorage.getItem('cart') || '[]');
+                if (cart.length === 0) return;
+                cartContainer.classList.add('expanded');
+                cartChevron.style.transform = 'rotate(180deg)';
+            }
         }
 
         // Expand cart
@@ -323,12 +358,14 @@
 
             const cartContainer = document.getElementById('cartContainer');
             cartContainer.classList.add('expanded');
+            document.getElementById('cartChevron').style.transform = 'rotate(180deg)';
         }
 
         // Collapse cart
         function collapseCart() {
             const cartContainer = document.getElementById('cartContainer');
             cartContainer.classList.remove('expanded');
+            document.getElementById('cartChevron').style.transform = 'rotate(0deg)';
         }
 
         // Hapus dari keranjang
